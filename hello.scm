@@ -59,3 +59,68 @@
         n
         (length-rec (cdr lis) (+ n 1))))
   (length-rec lis 0))
+
+
+(define (tree-walk walker proc tree)
+  (walker (lambda (elt)
+            (if (list? elt)
+                (tree-walk walker proc elt)
+                (proc elt)))
+          tree))
+
+(define (reverse-for-each proc lis)
+  (for-each proc (reverse lis)))
+
+(define (reverse-map proc lis)
+  (map proc (reverse lis)))
+
+(define (reversed walker)
+  (lambda (proc lis)
+    (walker proc (reverse lis))))
+
+
+
+(define (filter2 proc lis)
+  (cond ((null? lis) '())
+        ((proc (car lis)) (cons (car lis) (filter2 proc (cdr lis))))))
+
+(define (fil2 proc lis)
+  (cond ((null? lis) lis)
+        ((proc (car lis))
+         (cons (car lis) (fil2 proc (cdr lis))))
+        (else (fil2 proc (cdr lis)))))
+
+
+;; p68 ²ÝÂê
+(define (for-each-numbers proc lis)
+  (for-each proc (fil2 number? lis)))
+
+(define (map-numbers proc lis)
+  (map proc (fil2 number? lis)))
+
+(define (numbers-only walker)
+  (lambda (proc lis)
+    (walker proc (fil2 number? lis))))
+
+
+
+      
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                       
