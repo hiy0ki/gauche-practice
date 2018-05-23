@@ -34,9 +34,9 @@
       lis))
 
 (define (append2 a b)
-  (if (pair? a)
+  (if (pair? #?=a)
       (cons (car a) (append2 (cdr a) b))
-      b))
+      #?=b))
 
 (define (reverse1 lis)
   (fold2 cons '() lis))
@@ -103,24 +103,31 @@
     (walker proc (fil2 number? lis))))
 
 
+;; local
 
-      
-            
-
-
-
-
-
-
-
+((lambda (a b) (+ (* a a ) (* b b))) 3 4)
+;; lambdaの仮引数がローカル変数の正体そのもの
+;; なので上と下の式は同じ意味になる
+(let ((a 3)
+      (b 4))
+  (+ (* a a) (* b b)))
 
 
+;; 可変長引数
+(define (func a b . c)
+  (print "a=" a ". b=" b ". c=" c))
 
 
+;;; 0個以上の可変長引数 その1
+(define list2
+  (lambda a
+    (if (null? a) '()
+        (cons (car a) (apply list2 (cdr a))))))
 
+;; 0個以上の可変長引数 その2
+;; こっちのほうがわかりやすいきがする
+(define (list3 . a)
+  (if (null? a) '()
+      (cons (car a) (apply list3 (cdr a)))))
 
-
-
-
-
-                       
+;; 
