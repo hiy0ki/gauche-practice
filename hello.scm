@@ -34,8 +34,8 @@
       lis))
 
 (define (append2 a b)
-  (if (pair? #?=a)
-      (cons (car a) (append2 (cdr a) b))
+  (if (pair? a)
+      #?=(cons (car #?=a) (append2 (cdr a) #?=b))
       #?=b))
 
 (define (reverse1 lis)
@@ -130,4 +130,20 @@
   (if (null? a) '()
       (cons (car a) (apply list3 (cdr a)))))
 
-;; 
+;; pattern match
+(define (append3 . args)
+  (cond ((null? #?=args) '())
+        ((null? (cdr args)) (car args))
+        (else (append2 #?=(car args) (apply append3 (cdr args))))))
+
+
+(use util.match)
+
+(define (append4 . args)
+  (match args
+         (() '())
+         ((a) a)
+         ((a . b) (append2 a (apply append4 b)))))
+
+
+
