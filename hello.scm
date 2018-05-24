@@ -192,4 +192,27 @@
 (values '(3 4 ) (* 45 2))
 
 
+;; 真偽値
+(equal? '(1 2 3) '(1 2 3))
+
+(eq? '(1 2 3) '(1 2 3))
+
+(define p '(1 2 3))
+
+(eq? p p)
+
+;; 6章 状態の管理
+(define *inventory* (list 'potion 'potion 'dagger 'cookie 'dagger))
+
+(member 'cookie *inventory*)
+
+(define (member2 elt lis . options)
+  (let-optionals* options ((cmp-fn equal?))
+                  (cond ((null? lis) #f)
+                        ((cmp-fn elt (car lis)) lis)
+                        (else (member elt (cdr lis) cmp-fn)))))
+
+
+                        
+                        
 
