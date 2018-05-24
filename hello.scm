@@ -146,4 +146,50 @@
          ((a . b) (append2 a (apply append4 b)))))
 
 
+;; make-list
+(define (make-list2 num . args)
+  (define (maker n init)
+    (if (= n 0)
+        '()
+        (cons init (maker (- n 1) init))))
+  (maker num (if (null? args) #f (car args))))
+
+(define (make-list3 num . args)
+  (let-optionals* args ((init #f))
+                  (define (maker n)
+                    (if (= n 0) '() (cons init (maker (- n 1)))))
+                  (maker num)))
+
+;; keyword引数
+(define (parson . args)
+  (let-keywords args ((name "Anonymous")
+                      (age "unknown")
+                      . other-args)
+                (print name " is " age " year(s) old.")
+                (print "other info: " other-args)))
+
+;; 多値
+(min&max 52 24 4302 135 4)
+
+(use srfi-1)
+(split-at '(1 2 3 4 5 6 7 8 9 10) 3)
+
+;; 受け取る
+(receive (min-val max-val)
+         (min&max 4 2 1)
+         (list min-val max-val))
+
+(receive (min-val . rest)
+         (min&max 4 2 1)
+         (list min-val rest))
+
+(receive all-values
+         (min&max 4 2 1)
+         all-values)
+
+;; 返す
+(values 1 2 3 4)
+(values '(3 4 ) (* 45 2))
+
+
 
