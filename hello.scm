@@ -212,7 +212,63 @@
                         ((cmp-fn elt (car lis)) lis)
                         (else (member elt (cdr lis) cmp-fn)))))
 
+(define (member3 elt lis . options)
+  (let-optionals* options ((cmp-fn equal?))
+                  (define (loop lis)
+                    (cond ((null? lis) #f)
+                          ((cmp-fn elt (car lis)) lis)
+                          (else (loop (cdr lis)))))
+                  (loop lis)))
 
-                        
-                        
+(define *long-list* (make-list 1000000 #f))
+
+(define (has-item? item)
+  (member item *inventory*))
+
+;; 条件に一致する要素を一つ削除する
+(define (delete-1 elt lis . options)
+  (let-optionals* options ((cmp-fn equal?))
+                  (define (loop lis)
+                    (cond ((null? lis) '())
+                          ((cmp-fn elt (car lis)) (cdr lis))
+                          (else (cons (car lis) (loop (cdr lis))))))
+                  (loop lis)))
+
+(delete-1 'aaa '(a aaa bb aaa bbb cc ccc cc))
+
+
+;; 要素が見つからなかった場合に一切コピーしないdelete-1を実装する
+(define (delete-1-nc elt lis . options)
+  (let-optionals* options ((cmp-fn equal?))
+                  (define (loop lis)
+                    (cond ((null? lis) '())
+                          ((cmp-fn elt (car lis)) (cdr lis))
+                          (else (cons (car lis) (loop (cdr lis))))))
+                  (loop lis)))
+
+(use gauche.test)
+(let ((data (list 1 2 3 4 5)))
+  (test* "non copy delete-1" data (delete-1-nc 6 data) eq?))
+
+
+(define (delete-item! item)
+  (set! *inventory* (delete-1 item *inventory*)))
+
+(define (add-item! item)
+  (set! *inventory* (add-item! item *inventory*)))
+
+(define (add-item!2 item)
+  (push! *inventory* item))
+
+;; !がつくのは破壊的変更をする手続き。schemeの慣習
+
+(define (assoc2 key alist . options)
+  (let-optionals* options ((cmp-fn equal?))
+                  (define (loop alis)
+                    (cond ((null? alis) #f)
+                          ((cmp-fn key (caar alis)) (car alis))
+                          (else (loop (cdr alis)))))
+                  (loop alist)))
+
+
 
