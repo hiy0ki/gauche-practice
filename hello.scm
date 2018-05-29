@@ -272,3 +272,27 @@
 
 
 
+;; 似たようなパターンをまとめる
+(define (traverse fallback get-key return repeat)
+  (lambda (elt lis . options)
+    (let-optionals* options ((cmp-fn equal?))
+                    (define (loop lis)
+                      (cond ((null? lis) fallback)
+                            ((cmp-fn elt (get-key lis)) (return lis))
+                            (else (repeat loop lis))))
+                    (loop lis))))
+
+(define member4
+  (traverse #f car values
+            (lambda (loop lis) (loop (cdr lis)))))
+
+(define delete-1
+  (traverse '() car cdr
+            (lambda (loop lis) (cons (car lis) (loop (cdr lis))))))
+
+(define assoc3
+  (traverse #f caar car
+            (lambda (loop lis) (loop (cdr lis)))))
+
+
+
