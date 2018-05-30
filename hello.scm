@@ -20,7 +20,7 @@
 (define (fold2 proc init lis)
   (if (null? lis)
       init
-      (fold2 proc (car lis) init) (cdr lis))))
+      (fold2 proc (car lis) (cdr lis))))
 
 
 (define (last-pair2 lis)
@@ -45,7 +45,6 @@
   (if (pair? lis)
       (append2 (reverse2 (cdr lis)) (list (car lis)))
       lis))
-
 
 (define (find2 pred lis)
   (cond ((null? lis) #f)
@@ -294,5 +293,51 @@
   (traverse #f caar car
             (lambda (loop lis) (loop (cdr lis)))))
 
+
+;; game
+(define *item-database*
+  '((potion (drink . #t) (throw . #t))
+    (elixir (drink . #t) (throw . #t))
+    (pancake (eat . #t) (throw . #t))
+    (cookie (eat . #t) (throw . #t))
+    (dagger (throw . #t))))
+
+(define (item-properties item)
+  (cond ((assoc item *item-database*) => cdr)
+        (else '())))
+
+(define (item-property-get item prop)
+  (cond ((assoc prop (item-properties item)) => cdr)
+        (else #f)))
+
+(define (use-item! what item)
+  (cond ((not (has-item? item))
+         (print item "を持っていません"))
+        ((not (item-property-get item what))
+         (print item "を" what "することはできません"))
+        (else
+         (print what " " item)
+         (delete-item! item)))
+  #t)
+
+(define (make-player . args)
+  (define (loop lis)
+    (match lis
+           (() '())
+           ((attr value . rest) (cons (cons attr value) (loop rest)))))
+  (loop args))
+
+;; named-let
+(define (make-player2 . args)
+  (let loop ((lis args))
+    (match lis
+           (() '())
+           ((attr value . rest) (cons (cons attr value) (loop rest))))))
+
+(define *player*
+  (make-player2 'hp 300 'mp 66 'position #f 'inventory '(potion potion dagger cookie dagger)))
+
+
+  
 
 
