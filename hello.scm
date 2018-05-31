@@ -221,8 +221,8 @@
 
 (define *long-list* (make-list 1000000 #f))
 
-(define (has-item? item)
-  (member item *inventory*))
+(define (has-item? player item)
+  (member item (cdr (assoc 'inventory player))))
 
 ;; 条件に一致する要素を一つ削除する
 (define (delete-1 elt lis . options)
@@ -337,7 +337,53 @@
 (define *player*
   (make-player2 'hp 300 'mp 66 'position #f 'inventory '(potion potion dagger cookie dagger)))
 
+;; set!
+(define p (cons 1 2))
+(set! (car p) 3)
+(set! (cdr p) 4)
+(set! (cdr p) (cons 5 (cdr p)))
+(push! (cdr p) 10)
+(push! p 20)
 
-  
+
+(define (add-item! player item)
+  (let ((p (assoc 'inventory player)))
+    (push! (cdr p) item)))
+
+(define (delete-item! player item)
+  (let ((p (assoc 'inventory player)))
+    (set! (cdr p) (delete-1 item (cdr p)))))
+
+(define (get-hp player)
+  (cdr (assoc 'hp player)))
+
+(define (add-hp! player n)
+  (let ((p (assoc 'hp player)))
+    (set! (cdr p) (+ n (cdr p)))))
+
+(define (get-player-attr player attr)
+  (cdr (assoc attr player)))
+
+(define (update-player-attr! player attr updater)
+  (let ((p (assoc attr player)))
+    (set! (cdr p) (updater (cdr p)))))
+
+(define (get-inventory player)
+  (get-player-attr player 'inventory))
+
+(define (has-item? player item)
+  (member item (get-inventory player)))
+
+(define (delete-item! player item)
+  (update-player-attr! player 'inventory (cut delete-1 item <>)))
+
+(define (add-item! item)
+  (update-player-attr! player 'inventory (cut cons item <>)))
+
+;; 準クオート quasiquote
+`(* 0 (+ 1 2))
+`(* 3 ,(+ 1 2))
+
+
 
 
