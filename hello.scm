@@ -435,3 +435,21 @@
 (stream-ref fib 10000) ; 任意の位置にある要素の値を取り出す
 
 
+;; generic function
+(ref '(a b c d e) 2) ; c
+(ref '#(a b c d e) 2) ; c
+(ref "abcde" 2) ; c
+
+;; collection: 値のあつまり
+(use gauche.collection)
+(coerce-to <list> "abc")
+(group-collection '(1 2 3  1  2 3  1 1 1 1 2 2  3 3 3 2 1))
+
+(group-collection '(1 2 3  1  2 3  1 1 1 1 2 2  3 3 3 2 1) :key odd?)
+
+
+;; sequence: collection + 要素の順序
+(use gauche.sequence)
+(subseq "abcde" 2 5)
+
+(class-precedence-list <string>)
