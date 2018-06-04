@@ -386,4 +386,52 @@
 
 
 
+;; hash-table 順序は不定
+(define table (make-hash-table))
+
+(hash-table-put! table 'name "Gauche")
+(hash-table-put! table 'version "0.9")
+
+(hash-table-get table 'name)
+(hash-table-get table 'version)
+(hash-table-get table 'encodeing) ; error
+
+;; string をkeyにする
+(hash-table-put! table "key1" 1)
+
+(hash-table-get table "key1") ; error because use eq? function
+
+(define table2 (make-hash-table 'string=?))
+
+(hash-table-put! table2 "key1" 1)
+(hash-table-get table2 "key1") ; get!
+
+;; 一つのkeyに複数登録
+(hash-table-push! table 'key "aaa")
+(hash-table-push! table 'key "bbb")
+(hash-table-get table 'key) ; ("bbb" "aaa")
+
+(hash-table-pop! table 'key) ; "bbb"
+(hash-table-get table 'key) ; ("aaa")
+
+;; get all keys
+(hash-table-keys table)
+;; get all values
+(hash-table-values table)
+
+;; まとめて作成
+(define table3 (hash-table 'eq? '(key1 . 1) '(key2 . 2) '(key3 . 3)))
+(hash-table-keys table3)
+(hash-table-values table3)
+
+(hash-table-map table3 (lambda (key value) (* 5 value))) 
+
+;; ストリーム、遅延リスト
+(use util.stream)
+
+(define fib (stream-cons 0 (stream-cons 1 (stream-map + fib (stream-cdr fib)))))
+
+(stream->list (stream-take fib 10))
+(stream-ref fib 10000) ; 任意の位置にある要素の値を取り出す
+
 
