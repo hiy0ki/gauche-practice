@@ -453,3 +453,100 @@
 (subseq "abcde" 2 5)
 
 (class-precedence-list <string>)
+
+
+;; class
+(define-class <book> ()
+  ((author :init-keyword :author :init-value "±”§ﬂøÕ√Œ§È§∫")
+   (title :init-keyword :title :init-value "no title")
+   (timestamp :init-form (sys-time))))
+
+;; make
+(d (make <book> :outhor "John" :title "Hogehoge"))
+
+(define gauche-book
+  (make <book> :author "§ÿ§Ω∂ §¨§ÍªªÀ°µ≥ªŒ√ƒ" :title "programing Gauche"))
+
+(ref gauche-book 'author)
+(ref gauche-book 'title)
+(ref gauche-book 'timestamp)
+
+(set! (ref gauche-book 'author) "Kahua project")
+
+(ref gauche-book 'author)
+
+(class-precedence-list <book>)
+
+
+
+;; continuation
+(define (find-fold pred? proc seed lis)
+  (cond ((null? lis) seed)
+        ((pred? (car lis))
+         (let ((seed2 (proc (car lis) seed)))
+           (find-fold pred? proc seed2 (cdr lis))))
+        (else
+         (find-fold pred? proc seed (cdr lis)))))
+
+(define (process elt seed)
+  (print "found: " elt)
+  (cons elt seed))
+
+(find-fold odd? process '() '(1 2 3 4 5 6 7 8 9 10))
+
+;; let -> lambda
+(define (find-fold pred? proc seed lis)
+  (cond ((null? lis) seed)
+        ((pred? (car lis))
+         ((lambda (seed2)
+            (find-fold pred? proc seed2 (cdr lis)))
+          (proc (car lis) seed)))
+        (else
+         (find-fold pred? proc seed (cdr lis)))))
+
+(find-fold odd? process '() '(1 2 3 4 5 6 7 8 9 10))
+
+;; lambda -> continuation
+(define (find-fold pred? proc/cont seed lis)
+  (cond ((null? lis) seed)
+        ((pred? (car lis))
+         (proc/cont (car lis)
+                    seed
+                    (lambda (seed2)
+                      (find-fold pred? proc/cont seed2 (cdr lis)))))
+        (else
+         (find-fold pred? proc/cont seed (cdr lis)))))
+
+(define (process/cont elt seed cont)
+  (print "found: " elt)
+  (cont (cons elt seed)))
+
+(find-fold odd? process/cont '() '(1 2 3 4 5 6 7 8 9 10))
+
+(define next #f)
+(define (break val) val)
+
+(define (process/break elt seed cont)
+  (set! next
+        (lambda ()
+          (print "found: " elt)
+          (cont (cons elt seed))))
+  (break #f))
+
+(find-fold odd? process/break '() '(1 2 3 4 5 6 7 8 9 10))
+
+(next)
+(next)
+(next)
+
+
+
+
+
+
+
+
+
+
+
+
