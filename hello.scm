@@ -539,6 +539,143 @@
 (next)
 (next)
 
+(define (find-fold/cont pred? proc/cont seed lis cont)
+  (cond [(null? lis) (cont seed)]
+        [(pred? (car lis))
+         (proc/cont (car lis)
+                    seed
+                    (lambda (seed2)
+                      (find-fold/cont pred? proc/cont seed2 (cdr lis) cont)))]
+        [else
+         (find-fold/cont pred? proc/cont seed (cdr lis) cont)]))
+
+(find-fold/cont odd? process/cont '() (iota 10 1) print)
+
+;; call/cc
+;; call with current continuation
+(define (process/cc elt seed)
+  (call/cc
+   (lambda (cont)
+     (print "found: " elt)
+     (cont (cons elt seed)))))
+
+
+(find-fold odd? process/cc '() (iota 10 1)) ; L:483's find-fold
+
+(define (breaker/cc proc break)
+  (lambda (elt seed)
+    (call/cc
+     (lambda (cont)
+       (set! next (lambda () (cont (proc elt seed))))
+       (break #f)))))
+
+(call/cc
+ (lambda (cont0)
+   (find-fold odd? (breaker/cc process cont0)
+              '() (iota 10 1))))
+
+(next)
+
+(apropos 'call-with)
+
+;; 大域脱出
+(define-syntax block
+  (syntax-rules ()
+    [(_ escape body ...)
+     (call/cc (lambda (escape) body ...))]))
+
+(block escape-top
+       (block escape-1st
+              (block escape-2nd
+                     (escape-1st 1)
+                     (print 'NG!!!)
+                     )
+              (print 'NG!!)
+              )
+       (print 'OK)
+       )
+
+(+ 1 2 (block return ; return を識別子に設定
+              (print 'one)
+              (print 'two)
+              (return 3) ; ここで脱出
+              (print 'four))
+   4) ; (+ 1 2 3 4) が評価
+
+;; break/next付きfor-each
+(define-syntax for-each-ext
+  (syntax-rules ()
+    [(_ break next lambda-expr arg-list ...)
+     (let ((arg1 (list arg-list ...)))
+       (call/cc (lambda (break)
+                  (apply for-each
+                         (lambda arg
+                           (call/cc (lambda (next)
+                                      (apply lambda-expr arg))))
+                         arg1))))]))
+
+(for-each-ext break1 next1
+              (lambda (x)
+                (for-each-ext break2 next2
+                              (lambda (y)
+                                (format #t "~2d " (* x y)))
+                              (iota 9 1))
+                (newline))
+              (iota 9 1))
+
+
+(for-each-ext break1 next1
+              (lambda (x)
+                (for-each-ext break2 next2
+                              (lambda (y)
+                                (cond ((not (number? x)) (next1 x))
+                                      ((not (number? y)) (next2 y))
+                                      ((< x y) (break2 x))
+                                      ((>= x 100) (break1 'done))
+                                      (else (format #t "~2d " (* x y)))))
+                              '(1 2 3 a 4 5 b 6 7 c 8 #\a 9 '() 10))
+                (newline))
+              '(#\x 1 2 3 x 4 5 6 y 7 8 9 10 z 100))
+
+;; 簡易例外機構
+(define *signals* '())
+
+(define-syntax catch
+  (syntax-rules (finally)
+    [(_ (sig body ...) (finally follow ...))
+     (let* ((signals-backup *signals*)
+            (val (call/cc (lambda (k)
+                            (set! *signals* (cons (cons 'sig k) *signals*))
+                            body ...))))
+       (set! *signals* signals-backup)
+       follow ...
+       val)]
+    [(_ (sig body ...))
+     (catch (sig body ...) (finally))]))
+
+(define-syntax throw
+  (syntax-rules ()
+    [(_ sig val) ((cdr (assq 'sig *signals*)) val)]))
+
+;; use sample
+(define (div n d)
+  (if (= d 0)
+      (throw DivideZeroError
+             (print #`"ERROR: Divide Zero Error Occured...\n divide ,n by ZERO!\n--------"))
+      (/ n d)))
+
+(define (percentage a b)
+  (catch (DivideZeroError
+          (print (* (div a b) 100.0) "%"))
+         (finally
+          (print "follow..."))))
+
+(percentage 1 40)
+(percentage 10 0)
+
+
+                 
+                
 
 
 
