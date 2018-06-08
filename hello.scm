@@ -673,17 +673,38 @@
 (percentage 1 40)
 (percentage 10 0)
 
+;; co-routine
+(use util.queue)
 
-                 
-                
+(define *tasks* (make-queue))
 
+(define-syntax define-coroutine
+  (syntax-rules ()
+    [(_ (routine yield) body ...)
+     (define (routine)
+       (call/cc (lambda (return)
+                  (define (yield)
+                    (call/cc (lambda (cont)
+                               (enqueue! *tasks* cont)
+                               (return))))
+                  body ...))
+       ((dequeue! *tasks*)))]))
 
+(define (coroutine-init! . rs)
+  (set! *tasks* (make-queue))
+  (for-each (lambda (r)
+              (enqueue! *tasks* r))
+            rs))
 
+(define-coroutine (three yield)
+  (let lp ()
+    (print 'one)
+    (yield)
+    (print 'two)
+    (yield)
+    (print 'three)
+    (yield)
+    (lp)))
 
-
-
-
-
-
-
+;; (three)
 
