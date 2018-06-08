@@ -708,3 +708,16 @@
 
 ;; (three)
 
+
+;; module
+(add-load-path ".") ;; moduleがあるパスを*load-path*に追加
+(require "module-sample")
+;; (require "./module-sample") ; load-pathに追加しない場合はパス指定する必要がある
+(import module-sample)
+
+(use module-sample) ;; require,importの対象が同名であればuseが使える
+
+(define x 1)
+(addx 10) ; x が干渉しない
+
+
