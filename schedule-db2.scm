@@ -15,7 +15,10 @@
            (sys-rename tempfile *db-name*)))
 
 (define (initialize)
-  (schedule-write '()))
+  (let ((db (dbm-open <fsdbm>
+                      :path *db-name*
+                      :rw-mode :create)))
+    (dbm-close db)))
 
 (define (schedule . args)
   (match args
@@ -24,8 +27,8 @@
          [(day plan) (edit-schedule day plan)]
          [_ (display ">>>error<<<")]))
 
-(define (schedule-print item)
-  (print #`",(car item) : ,(cdr item)"))
+(define (schedule-print day plan)
+  (print #`",|day|: ,|plan|"))
 
 (define (list-schedule)
   (call-with-input-file *db-name*
