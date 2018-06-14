@@ -31,10 +31,11 @@
   (print #`",|day|: ,|plan|"))
 
 (define (list-schedule)
-  (call-with-input-file *db-name*
-    (lambda (in)
-      (let ((schedule-data (read in)))
-        (for-each schedule-print schedule-data)))))
+  (let ((db (dbm-open <fsdbm>
+                      :path *db-name*
+                      :rw-mode :read)))
+    (dbm-for-each db schedule-print)
+    (dbm-close db)))
 
 (define (schedule-find day)
   (call-with-input-file *db-name*
@@ -44,23 +45,23 @@
         (values item schedule-data)))))
 
 (define (show-schedule day)
-  (receive (item schedule-data)
-           (schedule-find day)
-           (if item
-               (schedule-print item)
-               (print ">>>empty<<<"))))
+  (let* ((db (dbm-open <fsdbm>
+                       :path *db-name*
+                       :rw-mode :read))
+         (plan (dbm-get db day #f)))
+    (if plan
+        (schedule-print day plan)
+        (print ">>>empty<<<"))
+    (dbm-close db)))
 
 (define (edit-schedule day plan)
-  (receive (item schedule-data)
-           (schedule-find day)
-           (cond [(not item)
-                  (push! schedule-data (cons day plan))]
-                 [(eq? plan 'delete)
-                  (set! schedule-data (delete item schedule-data))]
-                 [else
-                  (set! (cdr item) plan)])
-           (schedule-write schedule-data)))
-
+  (let ((db (dbm-open <fsdbm>
+                      :path *db-name*
+                      :rw-mode :write)))
+    (if (eq? plan 'delete)
+        (dbm-delete! db day)
+        (dbm-put! db day plan))
+    (dbm-close db)))
 
 
 
