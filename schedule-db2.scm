@@ -1,6 +1,7 @@
 (use srfi-1)
 (use util.match)
 (use dbm.fsdbm)
+(use gauche.parameter)
 
 
 (define *db-name* "./schedule")
@@ -62,6 +63,9 @@
         (dbm-delete! db day)
         (dbm-put! db day plan))
     (dbm-close db)))
+
+;; parameter sample
+(define x (make-parameter 20))
 
 
 
