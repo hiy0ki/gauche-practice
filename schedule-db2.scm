@@ -1,4 +1,3 @@
-(use srfi-1)
 (use util.match)
 (use dbm.fsdbm)
 (use gauche.parameter)
@@ -6,66 +5,52 @@
 
 (define *db-name* "./schedule")
 
-(dbm-open <fsdbm> :path *db-name* :rw-mode :write)
+(define db (make-parameter #f))
 
-(define (schedule-write schedule-data)
-  (receive (out tempfile)
-           (sys-mkstemp "schedule")
-           (write schedule-data out)
-           (close-output-port out)
-           (sys-rename tempfile *db-name*)))
+(define-syntax with-db
+  (syntax-rules ()
+    ((with-db (db path) . body)
+     (parameterize
+      ((db (dbm-open <fsdbm>
+                     :path path
+                     :rw-mode :write)))
+      (guard (e (else (dbm-close (db)) (raise e)))
+             (begin0
+              (begin . body)
+              (dbm-close (db))))))))
 
 (define (initialize)
-  (let ((db (dbm-open <fsdbm>
-                      :path *db-name*
-                      :rw-mode :create)))
-    (dbm-close db)))
+  (with-db (db *db-name*)
+           (dbm-for-each (db)
+                         (lambda (day plan)
+                           (dbm-delete! (db) day)))))
 
 (define (schedule . args)
-  (match args
-         [() (list-schedule)]
-         [(day) (show-schedule day)]
-         [(day plan) (edit-schedule day plan)]
-         [_ (display ">>>error<<<")]))
+  (with-db (db *db-name*)
+           (match args
+                  [() (list-schedule)]
+                  [(day) (show-schedule day)]
+                  [(day plan) (edit-schedule day plan)]
+                  [_ (display ">>>error<<<")])))
 
 (define (schedule-print day plan)
   (print #`",|day|: ,|plan|"))
 
 (define (list-schedule)
-  (let ((db (dbm-open <fsdbm>
-                      :path *db-name*
-                      :rw-mode :read)))
-    (dbm-for-each db schedule-print)
-    (dbm-close db)))
-
-(define (schedule-find day)
-  (call-with-input-file *db-name*
-    (lambda (in)
-      (let* ((schedule-data (read in))
-             (item (assoc day schedule-data)))
-        (values item schedule-data)))))
+  (dbm-for-each (db) schedule-print))
 
 (define (show-schedule day)
-  (let* ((db (dbm-open <fsdbm>
-                       :path *db-name*
-                       :rw-mode :read))
-         (plan (dbm-get db day #f)))
+  (let ((plan (dbm-get (db) day #f)))
     (if plan
         (schedule-print day plan)
-        (print ">>>empty<<<"))
-    (dbm-close db)))
+        (print ">>>empty<<<"))))
 
 (define (edit-schedule day plan)
-  (let ((db (dbm-open <fsdbm>
-                      :path *db-name*
-                      :rw-mode :write)))
-    (if (eq? plan 'delete)
-        (dbm-delete! db day)
-        (dbm-put! db day plan))
-    (dbm-close db)))
+  (if (eq? plan 'delete)
+      (dbm-delete! (db) day)
+      (dbm-put! (db) day plan)))
 
-;; parameter sample
-(define x (make-parameter 20))
+
 
 
 
