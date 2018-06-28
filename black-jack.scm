@@ -51,7 +51,14 @@
 
 ;; todo: j q k を点数丸める Aの扱いも追加する
 (define-method add-point ((p <player>) card)
-  (set! (point-of p) (+ (point-of p) (cdr card))))
+  (set! (point-of p) (calc-point (point-of p) card)))
+
+;; todo: case 1(A)
+(define (calc-point point card)
+  (+ point
+     (if (> (cdr card) 10)
+         10
+         (cdr card))))
 
 ;; 手札を公開する
 (define-method open-hands ((p <player>))
@@ -65,7 +72,7 @@
   (print (name-of p2) ":  " (open-hands/mask p2)))
 
 (define (show-result p1 p2)
-  (print (name-of (winner p1 p2)) " is win!")
+  (print "The winner is " (name-of (winner p1 p2)))
   (print (name-of p1) ":  point: " (point-of p1) " hands: " (open-hands p1))
   (print (name-of p2) ":  point: " (point-of p2) " hands: " (open-hands p2)))
 
@@ -80,8 +87,8 @@
 ;; cardを配る
 ;; playerの順番をどうやって制御するか
 (define (game)
-  (let ((com (make <player> :name "com"))
-        (usr (make <player> :name "usr"))
+  (let ((com (make <player> :name "computor"))
+        (usr (make <player> :name "you"))
         (deck (make <deck>)))
     (create-deck deck)
     (add-hands com (draw-card deck))
@@ -91,6 +98,25 @@
     (show-field com usr)
     (show-result com usr)))
 
-    
-             
+
+(define (next-draw? p)
+  (<= (point-of p) 21))
+
+;; game進行をどうやってモデル化するか
+
+(define (input-user-action)
+  (display "next action? draw=d,stay=s\n>")
+  (let ((in (read)))
+    (cond
+     ((equal? in 'd)
+      (print "draw"))
+     ((equal? in 's)
+      (print "stay"))
+     (else
+      (print "other")))))
+        
+(define (input-com-action)
+  (print "com's turn")
+  
+
 
