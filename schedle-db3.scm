@@ -1,5 +1,6 @@
 (use util.match)
 (use gauche.parameter)
+(use gauche.sequence)
 (use dbi)
 
 (define *db-name* "dbi:mysql:schedule;host=localhost")
@@ -37,19 +38,53 @@
   (print #`",|day|: ,|plan|"))
 
 (define (list-schedule)
-  (dbm-for-each (db) schedule-print))
+  (let* ((result (dbi-do (db)
+                         "select day, plan from plans"))
+         (getter (relation-accessor result))
+         (plan-list (map
+                     (lambda (row)
+                       (cons (getter row "day")
+                             (getter row "plan")))
+                     result)))
+    (for-each
+     (lambda (p)
+       (schedule-print (car p) (cdr p)))
+     plan-list)))
 
-(define (show-schedule day)
-  (let ((plan (dbm-get (db) day #f)))
-    (if plan
-        (schedule-print day plan)
+(define (schedule-get key)
+  (let* ((query (dbi-prepare (db)
+                             "select day, plan from plans where day = ?"))
+         (result (dbi-execute query key))
+         (getter (relation-accessor result))
+         (plan-list (map
+                     (lambda (row)
+                       (cons (getter row "day")
+                             (getter row "plan")))
+                     result)))
+    plan-list))
+
+(define (show-schedule key)
+  (let ((plan-list (schedule-get key)))
+    (if (pair? plan-list)
+        (let ((key (caar plan-list))
+              (plan (cdar plan-list)))
+          (schedule-print key plan))
         (print ">>>empty<<<"))))
 
-(define (edit-schedule day plan)
-  (if (eq? plan 'delete)
-      (dbm-delete! (db) day)
-      (dbm-put! (db) day plan)))
-
+(define (edit-schedule key plan)
+  (let ((plan-list (schedule-get key)))
+    (cond [(null? plan-list)
+           (let ((query (dbi-prepare (db)
+                                     "insert into plans (day, plan) values (?, ?)")))
+             (dbi-execute query key plan))]
+          [(eq? plan 'delete)
+           (let ((query (dbi-prepare (db)
+                                     "delete from plans where day = ?")))
+             (dbi-execute query key))]
+          [else
+           (let ((query (dbi-prepare (db)
+                                     "update plans set plan = ? where day = ?")))
+             (dbi-execute query plan key))])))
 
 
 
