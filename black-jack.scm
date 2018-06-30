@@ -41,9 +41,10 @@
 
 ;; player
 (define-class <player> ()
-  ((name :init-value "" :init-keyword :name :accessor name-of)
+  ((name :init-value 'player :init-keyword :name :accessor name-of)
    (hands :init-value '() :init-keyword :hands :accessor hands-of)
-   (point :init-value 0 :init-keyword :point :accessor point-of)))
+   (point :init-value 0 :init-keyword :point :accessor point-of)
+   (stay? :init-value #f :init-keyword :stay? :accessor stay?-of)))
 
 (define-method add-hands ((p <player>) card)
   (set! (hands-of p) (append (list card) (ref p 'hands)))
@@ -51,11 +52,11 @@
 
 ;; todo: j q k を点数丸める Aの扱いも追加する
 (define-method add-point ((p <player>) card)
-  (set! (point-of p) (calc-point (point-of p) card)))
+  (set! (point-of p) (calc-point p card)))
 
 ;; todo: case 1(A)
-(define (calc-point point card)
-  (+ point
+(define (calc-point ((p <player>) card)
+  (+ (point-of p)
      (if (> (cdr card) 10)
          10
          (cdr card))))
@@ -76,6 +77,7 @@
   (print (name-of p1) ":  point: " (point-of p1) " hands: " (open-hands p1))
   (print (name-of p2) ":  point: " (point-of p2) " hands: " (open-hands p2)))
 
+;; add if over 21
 (define (winner p1 p2)
   (if (>= (point-of p1) (point-of p2))
       p1
@@ -87,8 +89,8 @@
 ;; cardを配る
 ;; playerの順番をどうやって制御するか
 (define (game)
-  (let ((com (make <player> :name "computor"))
-        (usr (make <player> :name "you"))
+  (let ((com (make <player> :name 'computor))
+        (usr (make <player> :name 'you))
         (deck (make <deck>)))
     (create-deck deck)
     (add-hands com (draw-card deck))
@@ -102,21 +104,35 @@
 (define (next-draw? p)
   (<= (point-of p) 21))
 
-;; game進行をどうやってモデル化するか
-
 (define (input-user-action)
   (display "next action? draw=d,stay=s\n>")
   (let ((in (read)))
     (cond
      ((equal? in 'd)
-      (print "draw"))
+      (print "draw")
+      (add-hands *usr* (draw-card deck)))
      ((equal? in 's)
-      (print "stay"))
+      (print "stay")
+      (set! (stay?-of *usr*) #t))
      (else
       (print "other")))))
-        
+
+(define (game-loop)
+  (let loop ((np *start-player*))
+      (if (and (stay?-of *usr*) (stay?-of *com*))
+          (show-result *com* *usr*)
+          (loop (next-player))))))
+
+(define *com* (make <player> :name 'computer))
+(define *usr* (make <player> :name 'you))
+
 (define (input-com-action)
   (print "com's turn")
-  
+  (if (next-draw?)
+      (add-hands *com* (draw-card deck))
+      (set! (stay?-of *com*) #t)))
+
+(define (turn-end? p1 p2)
+  (and (stay?-of p1) (stay?-of p2)))
 
 
