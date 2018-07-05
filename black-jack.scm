@@ -1,18 +1,17 @@
 ;; black jack
-(define *card-simbols* '(h k d s))
-(define *card-numbers* (iota 13 1))
 
-(define (merge-card simbol numbers)
+(define (create-card-from-simbol simbol numbers)
   (map (lambda (n)
          (cons simbol n))
        numbers))
 
 (define (create-card-list simbols numbers)
   (if (null? simbols) '()
-      (append (merge-card (car simbols) numbers) (create-card-list (cdr simbols) numbers))))
+      (append (create-card-from-simbol (car simbols) numbers)
+              (create-card-list (cdr simbols) numbers))))
 
 (define (card-list)
-  (create-card-list *card-simbols* *card-numbers*))
+  (create-card-list '(h k d s) (iota 13 1)))
 
 ;;; shuffle
 ;; カードのリストの長さを取得
@@ -25,9 +24,6 @@
       (let* ((key (random-integer (length card-list)))
              (val (list-ref card-list key)))
         (card-shuffle (delete val card-list) (append (list val) deck)))))
-
-#;(define (create-deck)
-  (card-shuffle (card-list)))
 
 ;; deck
 (define-class <deck> ()
@@ -48,22 +44,22 @@
 
 (define-method add-hands ((p <player>) card)
   (set! (hands-of p) (append (list card) (ref p 'hands)))
-  (add-point p card))
+  (add-point p))
 
 ;; todo: j q k を点数丸める Aの扱いも追加する
-(define-method add-point ((p <player>) card)
-  (set! (point-of p) (calc-point p card)))
+(define-method add-point ((p <player>))
+  (set! (point-of p) (calc-point p)))
 
-;; todo: case 1(A)
-(define (calc-point ((p <player>) card)
-  (+ (point-of p)
-     (if (> (cdr card) 10)
-         10
-         (cdr card))))
-
-;; 手札を公開する
-(define-method open-hands ((p <player>))
-  (hands-of p))
+(define-method calc-point ((p <player>))
+                    (+ (point-of p)
+                       (let ((card-num (cdr (car (hands-of p)))))
+                         (cond ((null? card-num) 0)
+                               ((> card-num 10) 10) ; j q k
+                               ((eq? card-num 1) ; A
+                                (if (> (point-of p) 10)
+                                    1
+                                    11))
+                               (else card-num)))))
 
 (define-method open-hands/mask ((p <player>))
   (append '("***") (cdr (hands-of p))))
@@ -88,7 +84,7 @@
 ;; deckを作る
 ;; cardを配る
 ;; playerの順番をどうやって制御するか
-(define (game)
+(define (game-test)
   (let ((com (make <player> :name 'computor))
         (usr (make <player> :name 'you))
         (deck (make <deck>)))
@@ -100,11 +96,14 @@
     (show-field com usr)
     (show-result com usr)))
 
-
+;; todo computerに依存させたほうが良さそう。
 (define (next-draw? p)
-  (<= (point-of p) 21))
+  (or (<= (point-of p) 17)
+      (<= (point-of p) 21)))
 
-(define (input-user-action)
+;; todo userも別途定義したほうがいいかも
+
+#;(define (input-user-action)
   (display "next action? draw=d,stay=s\n>")
   (let ((in (read)))
     (cond
@@ -117,12 +116,13 @@
      (else
       (print "other")))))
 
-(define (game-loop)
-  (let loop ((np *start-player*))
+#;(define (game-loop)
+  (let loop ((np *start-player*)
       (if (and (stay?-of *usr*) (stay?-of *com*))
           (show-result *com* *usr*)
-          (loop (next-player))))))
+          (loop (next-player)))))
 
+(define *deck* (make <deck>))
 (define *com* (make <player> :name 'computer))
 (define *usr* (make <player> :name 'you))
 
