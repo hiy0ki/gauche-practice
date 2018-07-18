@@ -24,8 +24,12 @@
       (make-month 1 (+ (date-year date) 1))
       (make-month (+ (date-month date) 1) (date-year date))))
 
-
 (define (prev-month date)
   (if (= (date-month date) 1)
       (make-month 12 (- (date-year date) 1))
       (make-month (- (date-month date) 1) (date-year date))))
+
+
+(use srfi-19)
+(date->julian-day today)
+
