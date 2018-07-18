@@ -30,6 +30,38 @@
       (make-month (- (date-month date) 1) (date-year date))))
 
 
+;; ユリウス日と改定ユリウス日
 (use srfi-19)
 (date->julian-day today)
+(date->modified-julian-day today)
+
+;; 日数計算
+(define date1 (make-date 0 0 0 0 31 8 2007 (date-zone-offset (current-date))))
+(define date2 (make-date 0 0 0 0 31 12 2006 (date-zone-offset (current-date))))
+
+(- (date->modified-julian-day date1)
+   (date->modified-julian-day date2))
+
+
+(define (days-of-month date)
+  (- (date->modified-julian-day (next-month date))
+     (date->modified-julian-day (first-day-of-month date))))
+
+
+(make-list
+ (date-week-day
+  (make-date 0 0 0 0 1 1 2007 (date-zone-offset (current-date))))
+ #f)
+
+(iota (days-of-month (current-date)) 1)
+
+(slices
+ (append
+  (make-list
+   (date-week-day
+    (first-day-of-month (current-date))))
+  (iota (days-of-month (current-date)) 1))
+ 7 #t #f)
+
+
 
