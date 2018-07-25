@@ -79,6 +79,10 @@
       p1
       p2))
 
+(define (over-point-limit? point)
+  (if (> point 21) #t #f))
+
+
 ;;; game
 ;; computer,userを作る
 ;; deckを作る
