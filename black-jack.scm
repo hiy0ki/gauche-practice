@@ -70,8 +70,8 @@
 
 (define (show-result p1 p2)
   (print "The winner is " (name-of (winner p1 p2)))
-  (print (name-of p1) ":  point: " (point-of p1) " hands: " (open-hands p1))
-  (print (name-of p2) ":  point: " (point-of p2) " hands: " (open-hands p2)))
+  (print (name-of p1) ":  point: " (point-of p1) " hands: " (hands-of p1))
+  (print (name-of p2) ":  point: " (point-of p2) " hands: " (hands-of p2)))
 
 ;; add if over 21
 (define (winner p1 p2)
@@ -81,6 +81,42 @@
 
 (define (over-point-limit? point)
   (if (> point 21) #t #f))
+
+;; game loop
+;; com,user,deckはすでにある
+;; userのstay?
+;; if user selected false, draw card
+;; com stay?
+;; if com selected false, draw card
+;; next user turn
+
+(define (game com usr deck)
+  (show-field com usr)
+  (display "stay?[y\/n]\n> ")
+  (let ((usr-stay? (read)))
+    (cond ((and
+            (if (stay?-of usr) #f #t)
+            (eq? usr-stay? 'n))
+           (print "usr draws card")
+           (add-hands usr (draw-card deck)))
+          (else (set! (stay?-of usr) #t)))
+    (cond ((com-stay? com)
+           (print "com draws card")
+           (add-hands com (draw-card deck)))
+          (else (set! (stay?-of com) #t)))
+    (print "end")))
+
+;; TODO もっとスッキリかけるはず
+(define (com-stay? com)
+  (if (and (stay?-of com)
+           (> (point-of com) 17))
+      #t
+      #f))
+
+(define (next-turn? com usr)
+  (if (and (stay?-of com) (stay?-of usr))
+      #f
+      #t))
 
 
 ;;; game
@@ -97,6 +133,12 @@
     (add-hands usr (draw-card deck))
     (add-hands com (draw-card deck))
     (add-hands usr (draw-card deck))
+    (let loop ((c com)
+               (u usr)
+               (d deck))
+      (game c u d)
+      (when (next-turn? c u)
+            (loop c u d)))
     (show-field com usr)
     (show-result com usr)))
 
@@ -124,19 +166,17 @@
   (let loop ((np *start-player*)
       (if (and (stay?-of *usr*) (stay?-of *com*))
           (show-result *com* *usr*)
-          (loop (next-player)))))
+          (loop (next-player))))))
 
-(define *deck* (make <deck>))
-(define *com* (make <player> :name 'computer))
-(define *usr* (make <player> :name 'you))
+;(define *deck* (make <deck>))
+;(define *com* (make <player> :name 'computer))
+;(define *usr* (make <player> :name 'you))
 
-(define (input-com-action)
-  (print "com's turn")
-  (if (next-draw?)
-      (add-hands *com* (draw-card deck))
-      (set! (stay?-of *com*) #t)))
+;(define (input-com-action)
+;  (print "com's turn")
+;  (if (next-draw?)
+;      (add-hands *com* (draw-card deck))
+;      (set! (stay?-of *com*) #t)))
 
-(define (turn-end? p1 p2)
-  (and (stay?-of p1) (stay?-of p2)))
-
-
+;(define (turn-end? p1 p2)
+;  (and (stay?-of p1) (stay?-of p2)))
