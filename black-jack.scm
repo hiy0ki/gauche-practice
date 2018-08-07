@@ -64,9 +64,9 @@
 (define-method open-hands/mask ((p <player>))
   (append '("***") (cdr (hands-of p))))
 
-(define (show-field p1 p2)
-  (print (name-of p1) ":  " (open-hands/mask p1))
-  (print (name-of p2) ":  " (open-hands/mask p2)))
+(define (show-field com usr)
+  (print (name-of com) ":  " (open-hands/mask com))
+  (print (name-of usr) ":  " (hands-of usr)))
 
 (define (show-result p1 p2)
   (print "The winner is " (name-of (winner p1 p2)))
@@ -108,8 +108,8 @@
 
 ;; TODO もっとスッキリかけるはず
 (define (com-stay? com)
-  (if (and (stay?-of com)
-           (> (point-of com) 17))
+  (if (or (> (point-of com) 17)
+          (stay?-of com))
       #t
       #f))
 
@@ -147,36 +147,3 @@
   (or (<= (point-of p) 17)
       (<= (point-of p) 21)))
 
-;; todo userも別途定義したほうがいいかも
-
-#;(define (input-user-action)
-  (display "next action? draw=d,stay=s\n>")
-  (let ((in (read)))
-    (cond
-     ((equal? in 'd)
-      (print "draw")
-      (add-hands *usr* (draw-card deck)))
-     ((equal? in 's)
-      (print "stay")
-      (set! (stay?-of *usr*) #t))
-     (else
-      (print "other")))))
-
-#;(define (game-loop)
-  (let loop ((np *start-player*)
-      (if (and (stay?-of *usr*) (stay?-of *com*))
-          (show-result *com* *usr*)
-          (loop (next-player))))))
-
-;(define *deck* (make <deck>))
-;(define *com* (make <player> :name 'computer))
-;(define *usr* (make <player> :name 'you))
-
-;(define (input-com-action)
-;  (print "com's turn")
-;  (if (next-draw?)
-;      (add-hands *com* (draw-card deck))
-;      (set! (stay?-of *com*) #t)))
-
-;(define (turn-end? p1 p2)
-;  (and (stay?-of p1) (stay?-of p2)))
