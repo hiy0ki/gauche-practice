@@ -100,7 +100,7 @@
            (print "usr draws card")
            (add-hands usr (draw-card deck)))
           (else (set! (stay?-of usr) #t)))
-    (cond ((com-stay? com)
+    (cond ((not (com-stay? com))
            (print "com draws card")
            (add-hands com (draw-card deck)))
           (else (set! (stay?-of com) #t)))
