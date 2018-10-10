@@ -1,4 +1,4 @@
-; ¿˛∑¡πÁ∆±À°§À§Ë§ÎÕøÙ§Œ¿∏¿Æ
+; Á∑öÂΩ¢ÂêàÂêåÊ≥ï„Å´„Çà„Çã‰π±Êï∞„ÅÆÁîüÊàê
 (define *seed* 1)
 
 (define (srand x)
@@ -14,11 +14,11 @@
 (define (get-time)
   (sys-time))
 
-;; 1 to n §ŒÕøÙ¿∏¿Æ
+;; 1 to n „ÅÆ‰π±Êï∞ÁîüÊàê
 (define (make-number n)
   (+ (modulo (quotient (irand) #x10000) n) 1))
 
-;; øÙª˙§Œ∆˛Œœ
+;; Êï∞Â≠ó„ÅÆÂÖ•Âäõ
 (define (input-number)
   (display "please input integer(1-100)\n> ")
   (let ((data (read)))
@@ -31,7 +31,7 @@
            (display "range error\n")
            (input-number)))))
 
-;; øÙ§¢§∆•≤°º•‡
+;; Êï∞„ÅÇ„Å¶„Ç≤„Éº„É†
 (define (game answer)
   (let loop ((count 1))
     (if (< 7 count)
@@ -50,7 +50,7 @@
                  (newline)
                  (loop (+ count 1))))))))
 
-;; game§Œº¬π‘
+;; game„ÅÆÂÆüË°å
 (define (play)
   (srand (sys-time))
   (let loop ((answer (make-number 100)))

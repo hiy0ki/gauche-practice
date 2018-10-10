@@ -30,12 +30,12 @@
       (make-month (- (date-month date) 1) (date-year date))))
 
 
-;; ¥æ¥ê¥¦¥¹Æü¤È²þÄê¥æ¥ê¥¦¥¹Æü
+;; ãƒ¦ãƒªã‚¦ã‚¹æ—¥ã¨æ”¹å®šãƒ¦ãƒªã‚¦ã‚¹æ—¥
 (use srfi-19)
 (date->julian-day today)
 (date->modified-julian-day today)
 
-;; Æü¿ô·×»»
+;; æ—¥æ•°è¨ˆç®—
 (define date1 (make-date 0 0 0 0 31 8 2007 (date-zone-offset (current-date))))
 (define date2 (make-date 0 0 0 0 31 12 2006 (date-zone-offset (current-date))))
 

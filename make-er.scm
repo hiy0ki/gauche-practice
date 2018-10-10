@@ -1,4 +1,4 @@
-;;; ÂĞ¾İ¤ÎDB¤ÎÁ´¥Æ¡¼¥Ö¥ë¤ÎER¿Ş¤òºîÀ®¤¹¤ë
+;;; å¯¾è±¡ã®DBã®å…¨ãƒ†ãƒ¼ãƒ–ãƒ«ã®ERå›³ã‚’ä½œæˆã™ã‚‹
 (use dbi)
 (use gauche.parameter)
 (use gauche.sequence)
@@ -6,12 +6,13 @@
 (define *db-name* "dbi:mysql:information_schema;host=localhost")
 (define *db-user* "root")
 (define *db-pass* "Daijyukirohi21!")
-(define db (make-parameter #f))
 
-;; db¤«¤étable¤Îlist¤ò¼èÆÀ¤¹¤ë
-;; table¤Î¥ê¥¹¥È¤«¤éschema¤ò¼èÆÀ
-;; schema¤ò¤â¤È¤Ëgraphiz¤Î¥Õ¥¡¥¤¥ë(.dot)¤ò½ĞÎÏ¤¹¤ë
-;; dot¥Õ¥¡¥¤¥ë¤«¤épng¥Õ¥¡¥¤¥ë¤ò½ĞÎÏ¤¹¤ë
+;; dbã‹ã‚‰tableã®listã‚’å–å¾—ã™ã‚‹
+;; tableã®ãƒªã‚¹ãƒˆã‹ã‚‰schemaã‚’å–å¾—
+;; schemaã‚’ã‚‚ã¨ã«graphizã®ãƒ•ã‚¡ã‚¤ãƒ«(.dot)ã‚’å‡ºåŠ›ã™ã‚‹
+;; dotãƒ•ã‚¡ã‚¤ãƒ«ã‹ã‚‰pngãƒ•ã‚¡ã‚¤ãƒ«ã‚’å‡ºåŠ›ã™ã‚‹
+
+
 (define-syntax with-db
   (syntax-rules ()
     ((with-db (db dsn) . body)
@@ -22,13 +23,19 @@
               (begin . body)
               (dbi-close (db))))))))
 
-(define (get-tables)
+;; todo prepare statement
+(define (get-tables :optional (table-schema 'schedule))
   (with-db (db *db-name*)
-           (let* ((result (dbi-do (db) "select table_name from tables where table_schema = 'schedule'"))
+           (let* ((query
+                   (dbi-prepare (db)
+                                "select table_name, column_name, column_type from columns where table_schema = ?"))
+                  (result (dbi-execute query table-schema))
                   (getter (relation-accessor result))
                   (table-name-list (map
                      (lambda (row)
-                       (getter row "table_name"))
+                       (list (getter row "table_name")
+                             (getter row "column_name")
+                             (getter row "column_type")))
                      result)))
            table-name-list)))
 

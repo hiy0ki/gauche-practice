@@ -15,10 +15,10 @@
   (create-card-list '(h k d s) (iota 13 1)))
 
 ;;; shuffle
-;; ¥«¡¼¥É¤Î¥ê¥¹¥È¤ÎÄ¹¤µ¤ò¼èÆÀ
-;; ¤½¤ÎÄ¹¤µÆâ¤Î¥é¥ó¥À¥à¤Ê¿ô»ú¤ò¼è¤ë
-;; ¤½¤Î¿ô»ú¤òÍ×ÁÇ¤È¤·¤Æ¥«¡¼¥É¤Î¥ê¥¹¥È¤«¤é°ì¤Ä¼è¤ê½Ğ¤·½ĞÎÏÍÑ¤Î¥ê¥¹¥È¤ËÄÉ²Ã¤¹¤ë
-;; ¥«¡¼¥É¤Î¥ê¥¹¥È¤¬¤Ê¤¯¤Ê¤ë¤Ş¤Ç·«¤êÊÖ¤¹
+;; ã‚«ãƒ¼ãƒ‰ã®ãƒªã‚¹ãƒˆã®é•·ã•ã‚’å–å¾—
+;; ãã®é•·ã•å†…ã®ãƒ©ãƒ³ãƒ€ãƒ ãªæ•°å­—ã‚’å–ã‚‹
+;; ãã®æ•°å­—ã‚’è¦ç´ ã¨ã—ã¦ã‚«ãƒ¼ãƒ‰ã®ãƒªã‚¹ãƒˆã‹ã‚‰ä¸€ã¤å–ã‚Šå‡ºã—å‡ºåŠ›ç”¨ã®ãƒªã‚¹ãƒˆã«è¿½åŠ ã™ã‚‹
+;; ã‚«ãƒ¼ãƒ‰ã®ãƒªã‚¹ãƒˆãŒãªããªã‚‹ã¾ã§ç¹°ã‚Šè¿”ã™
 (use srfi-27)
 (define (card-shuffle card-list :optional (deck '()))
   (if (null? card-list) deck
@@ -33,7 +33,7 @@
 (define-method create-deck ((d <deck>))
   (set! (deck-of d) (card-shuffle (card-list))))
 
-;; todo: card¤¬¤Ê¤¤¾ì¹ç¤Î½èÍı ¤â¤¦°ì²ódeck¤ò¤Ä¤¯¤ë?
+;; todo: cardãŒãªã„å ´åˆã®å‡¦ç† ã‚‚ã†ä¸€å›deckã‚’ã¤ãã‚‹?
 (define-method draw-card ((d <deck>))
   (pop! (deck-of d)))
 
@@ -51,7 +51,7 @@
 (define-method add-point ((p <player>))
   (set! (point-of p) (calc-point p)))
 
-;; todo: A¤Î°·¤¤¤òÄÉ²Ã¤¹¤ë
+;; todo: Aã®æ‰±ã„ã‚’è¿½åŠ ã™ã‚‹
 (define-method calc-point ((p <player>))
                     (+ (point-of p)
                        (let ((card-num (cdr (car (hands-of p)))))
@@ -86,7 +86,7 @@
   (if (> point 21) #t #f))
 
 ;; game main
-;; todo user¤¬stay¤·¤¿¤éskip¤¹¤ë
+;; todo userãŒstayã—ãŸã‚‰skipã™ã‚‹
 (define (game com usr deck)
   (show-field com usr)
   (display "draw?[y\/n]\n> ")
@@ -103,7 +103,7 @@
           (else (set! (draw?-of com) #f)))
     (print "turn end.")))
 
-;; TODO ¤â¤Ã¤È¥¹¥Ã¥­¥ê¤«¤±¤ë¤Ï¤º
+;; TODO ã‚‚ã£ã¨ã‚¹ãƒƒã‚­ãƒªã‹ã‘ã‚‹ã¯ãš
 (define (com-draw? com)
   (and (<= (point-of com) 17)
       (draw?-of com)))
@@ -112,10 +112,10 @@
   (or (draw?-of com) (draw?-of usr)))
 
 ;;; game
-;; computer,user¤òºî¤ë
-;; deck¤òºî¤ë
-;; card¤òÇÛ¤ë
-;; player¤Î½çÈÖ¤ò¤É¤¦¤ä¤Ã¤ÆÀ©¸æ¤¹¤ë¤«
+;; computer,userã‚’ä½œã‚‹
+;; deckã‚’ä½œã‚‹
+;; cardã‚’é…ã‚‹
+;; playerã®é †ç•ªã‚’ã©ã†ã‚„ã£ã¦åˆ¶å¾¡ã™ã‚‹ã‹
 (define (main args)
   (let ((com (make <player> :name 'computor))
         (usr (make <player> :name 'you))

@@ -51,7 +51,7 @@
         ((pred (car lis)) (car lis))
         (else (find2 pred (cdr lis)))))
 
-;; ËöÈøºÆµ¢¥Ğ¡¼¥¸¥ç¥ó¤Îlength
+;; æœ«å°¾å†å¸°ãƒãƒ¼ã‚¸ãƒ§ãƒ³ã®length
 (define (length3 lis)
   (define (length-rec lis n)
     (if (null? lis)
@@ -90,7 +90,7 @@
         (else (fil2 proc (cdr lis)))))
 
 
-;; p68 ²İÂê
+;; p68 èª²é¡Œ
 (define (for-each-numbers proc lis)
   (for-each proc (fil2 number? lis)))
 
@@ -105,26 +105,26 @@
 ;; local
 
 ((lambda (a b) (+ (* a a ) (* b b))) 3 4)
-;; lambda¤Î²¾°ú¿ô¤¬¥í¡¼¥«¥ëÊÑ¿ô¤ÎÀµÂÎ¤½¤Î¤â¤Î
-;; ¤Ê¤Î¤Ç¾å¤È²¼¤Î¼°¤ÏÆ±¤¸°ÕÌ£¤Ë¤Ê¤ë
+;; lambdaã®ä»®å¼•æ•°ãŒãƒ­ãƒ¼ã‚«ãƒ«å¤‰æ•°ã®æ­£ä½“ãã®ã‚‚ã®
+;; ãªã®ã§ä¸Šã¨ä¸‹ã®å¼ã¯åŒã˜æ„å‘³ã«ãªã‚‹
 (let ((a 3)
       (b 4))
   (+ (* a a) (* b b)))
 
 
-;; ²ÄÊÑÄ¹°ú¿ô
+;; å¯å¤‰é•·å¼•æ•°
 (define (func a b . c)
   (print "a=" a ". b=" b ". c=" c))
 
 
-;;; 0¸Ä°Ê¾å¤Î²ÄÊÑÄ¹°ú¿ô ¤½¤Î1
+;;; 0å€‹ä»¥ä¸Šã®å¯å¤‰é•·å¼•æ•° ãã®1
 (define list2
   (lambda a
     (if (null? a) '()
         (cons (car a) (apply list2 (cdr a))))))
 
-;; 0¸Ä°Ê¾å¤Î²ÄÊÑÄ¹°ú¿ô ¤½¤Î2
-;; ¤³¤Ã¤Á¤Î¤Û¤¦¤¬¤ï¤«¤ê¤ä¤¹¤¤¤­¤¬¤¹¤ë
+;; 0å€‹ä»¥ä¸Šã®å¯å¤‰é•·å¼•æ•° ãã®2
+;; ã“ã£ã¡ã®ã»ã†ãŒã‚ã‹ã‚Šã‚„ã™ã„ããŒã™ã‚‹
 (define (list3 . a)
   (if (null? a) '()
       (cons (car a) (apply list3 (cdr a)))))
@@ -159,7 +159,7 @@
                     (if (= n 0) '() (cons init (maker (- n 1)))))
                   (maker num)))
 
-;; keyword°ú¿ô
+;; keywordå¼•æ•°
 (define (parson . args)
   (let-keywords args ((name "Anonymous")
                       (age "unknown")
@@ -167,13 +167,13 @@
                 (print name " is " age " year(s) old.")
                 (print "other info: " other-args)))
 
-;; Â¿ÃÍ
+;; å¤šå€¤
 (min&max 52 24 4302 135 4)
 
 (use srfi-1)
 (split-at '(1 2 3 4 5 6 7 8 9 10) 3)
 
-;; ¼õ¤±¼è¤ë
+;; å—ã‘å–ã‚‹
 (receive (min-val max-val)
          (min&max 4 2 1)
          (list min-val max-val))
@@ -186,12 +186,12 @@
          (min&max 4 2 1)
          all-values)
 
-;; ÊÖ¤¹
+;; è¿”ã™
 (values 1 2 3 4)
 (values '(3 4 ) (* 45 2))
 
 
-;; ¿¿µ¶ÃÍ
+;; çœŸå½å€¤
 (equal? '(1 2 3) '(1 2 3))
 
 (eq? '(1 2 3) '(1 2 3))
@@ -200,7 +200,7 @@
 
 (eq? p p)
 
-;; 6¾Ï ¾õÂÖ¤Î´ÉÍı
+;; 6ç«  çŠ¶æ…‹ã®ç®¡ç†
 (define *inventory* (list 'potion 'potion 'dagger 'cookie 'dagger))
 
 (member 'cookie *inventory*)
@@ -224,7 +224,7 @@
 (define (has-item? player item)
   (member item (cdr (assoc 'inventory player))))
 
-;; ¾ò·ï¤Ë°ìÃ×¤¹¤ëÍ×ÁÇ¤ò°ì¤Äºï½ü¤¹¤ë
+;; æ¡ä»¶ã«ä¸€è‡´ã™ã‚‹è¦ç´ ã‚’ä¸€ã¤å‰Šé™¤ã™ã‚‹
 (define (delete-1 elt lis . options)
   (let-optionals* options ((cmp-fn equal?))
                   (define (loop lis)
@@ -236,7 +236,7 @@
 (delete-1 'aaa '(a aaa bb aaa bbb cc ccc cc))
 
 
-;; Í×ÁÇ¤¬¸«¤Ä¤«¤é¤Ê¤«¤Ã¤¿¾ì¹ç¤Ë°ìÀÚ¥³¥Ô¡¼¤·¤Ê¤¤delete-1¤ò¼ÂÁõ¤¹¤ë
+;; è¦ç´ ãŒè¦‹ã¤ã‹ã‚‰ãªã‹ã£ãŸå ´åˆã«ä¸€åˆ‡ã‚³ãƒ”ãƒ¼ã—ãªã„delete-1ã‚’å®Ÿè£…ã™ã‚‹
 (define (delete-1-nc elt lis . options)
   (let-optionals* options ((cmp-fn equal?))
                   (define (loop lis)
@@ -259,7 +259,7 @@
 (define (add-item!2 item)
   (push! *inventory* item))
 
-;; !¤¬¤Ä¤¯¤Î¤ÏÇË²õÅªÊÑ¹¹¤ò¤¹¤ë¼êÂ³¤­¡£scheme¤Î´·½¬
+;; !ãŒã¤ãã®ã¯ç ´å£Šçš„å¤‰æ›´ã‚’ã™ã‚‹æ‰‹ç¶šãã€‚schemeã®æ…£ç¿’
 
 (define (assoc2 key alist . options)
   (let-optionals* options ((cmp-fn equal?))
@@ -271,7 +271,7 @@
 
 
 
-;; »÷¤¿¤è¤¦¤Ê¥Ñ¥¿¡¼¥ó¤ò¤Ş¤È¤á¤ë
+;; ä¼¼ãŸã‚ˆã†ãªãƒ‘ã‚¿ãƒ¼ãƒ³ã‚’ã¾ã¨ã‚ã‚‹
 (define (traverse fallback get-key return repeat)
   (lambda (elt lis . options)
     (let-optionals* options ((cmp-fn equal?))
@@ -312,9 +312,9 @@
 
 (define (use-item! what item)
   (cond ((not (has-item? item))
-         (print item "¤ò»ı¤Ã¤Æ¤¤¤Ş¤»¤ó"))
+         (print item "ã‚’æŒã£ã¦ã„ã¾ã›ã‚“"))
         ((not (item-property-get item what))
-         (print item "¤ò" what "¤¹¤ë¤³¤È¤Ï¤Ç¤­¤Ş¤»¤ó"))
+         (print item "ã‚’" what "ã™ã‚‹ã“ã¨ã¯ã§ãã¾ã›ã‚“"))
         (else
          (print what " " item)
          (delete-item! item)))
@@ -380,13 +380,13 @@
 (define (add-item! item)
   (update-player-attr! player 'inventory (cut cons item <>)))
 
-;; ½à¥¯¥ª¡¼¥È quasiquote
+;; æº–ã‚¯ã‚ªãƒ¼ãƒˆ quasiquote
 `(* 0 (+ 1 2))
 `(* 3 ,(+ 1 2))
 
 
 
-;; hash-table ½ç½ø¤ÏÉÔÄê
+;; hash-table é †åºã¯ä¸å®š
 (define table (make-hash-table))
 
 (hash-table-put! table 'name "Gauche")
@@ -396,7 +396,7 @@
 (hash-table-get table 'version)
 (hash-table-get table 'encodeing) ; error
 
-;; string ¤òkey¤Ë¤¹¤ë
+;; string ã‚’keyã«ã™ã‚‹
 (hash-table-put! table "key1" 1)
 
 (hash-table-get table "key1") ; error because use eq? function
@@ -406,7 +406,7 @@
 (hash-table-put! table2 "key1" 1)
 (hash-table-get table2 "key1") ; get!
 
-;; °ì¤Ä¤Îkey¤ËÊ£¿ôÅĞÏ¿
+;; ä¸€ã¤ã®keyã«è¤‡æ•°ç™»éŒ²
 (hash-table-push! table 'key "aaa")
 (hash-table-push! table 'key "bbb")
 (hash-table-get table 'key) ; ("bbb" "aaa")
@@ -419,20 +419,20 @@
 ;; get all values
 (hash-table-values table)
 
-;; ¤Ş¤È¤á¤ÆºîÀ®
+;; ã¾ã¨ã‚ã¦ä½œæˆ
 (define table3 (hash-table 'eq? '(key1 . 1) '(key2 . 2) '(key3 . 3)))
 (hash-table-keys table3)
 (hash-table-values table3)
 
 (hash-table-map table3 (lambda (key value) (* 5 value))) 
 
-;; ¥¹¥È¥ê¡¼¥à¡¢ÃÙ±ä¥ê¥¹¥È
+;; ã‚¹ãƒˆãƒªãƒ¼ãƒ ã€é…å»¶ãƒªã‚¹ãƒˆ
 (use util.stream)
 
 (define fib (stream-cons 0 (stream-cons 1 (stream-map + fib (stream-cdr fib)))))
 
 (stream->list (stream-take fib 10))
-(stream-ref fib 10000) ; Ç¤°Õ¤Î°ÌÃÖ¤Ë¤¢¤ëÍ×ÁÇ¤ÎÃÍ¤ò¼è¤ê½Ğ¤¹
+(stream-ref fib 10000) ; ä»»æ„ã®ä½ç½®ã«ã‚ã‚‹è¦ç´ ã®å€¤ã‚’å–ã‚Šå‡ºã™
 
 
 ;; generic function
@@ -440,7 +440,7 @@
 (ref '#(a b c d e) 2) ; c
 (ref "abcde" 2) ; c
 
-;; collection: ÃÍ¤Î¤¢¤Ä¤Ş¤ê
+;; collection: å€¤ã®ã‚ã¤ã¾ã‚Š
 (use gauche.collection)
 (coerce-to <list> "abc")
 (group-collection '(1 2 3  1  2 3  1 1 1 1 2 2  3 3 3 2 1))
@@ -448,7 +448,7 @@
 (group-collection '(1 2 3  1  2 3  1 1 1 1 2 2  3 3 3 2 1) :key odd?)
 
 
-;; sequence: collection + Í×ÁÇ¤Î½ç½ø
+;; sequence: collection + è¦ç´ ã®é †åº
 (use gauche.sequence)
 (subseq "abcde" 2 5)
 
@@ -457,7 +457,7 @@
 
 ;; class
 (define-class <book> ()
-  ((author :init-keyword :author :init-value "±Ó¤ß¿ÍÃÎ¤é¤º")
+  ((author :init-keyword :author :init-value "è© ã¿äººçŸ¥ã‚‰ãš")
    (title :init-keyword :title :init-value "no title")
    (timestamp :init-form (sys-time))))
 
@@ -465,7 +465,7 @@
 (d (make <book> :outhor "John" :title "Hogehoge"))
 
 (define gauche-book
-  (make <book> :author "¤Ø¤½¶Ê¤¬¤ê»»Ë¡µ³»ÎÃÄ" :title "programing Gauche"))
+  (make <book> :author "ã¸ãæ›²ãŒã‚Šç®—æ³•é¨å£«å›£" :title "programing Gauche"))
 
 (ref gauche-book 'author)
 (ref gauche-book 'title)
@@ -578,7 +578,7 @@
 
 (apropos 'call-with)
 
-;; Âç°èÃ¦½Ğ
+;; å¤§åŸŸè„±å‡º
 (define-syntax block
   (syntax-rules ()
     [(_ escape body ...)
@@ -595,14 +595,14 @@
        (print 'OK)
        )
 
-(+ 1 2 (block return ; return ¤ò¼±ÊÌ»Ò¤ËÀßÄê
+(+ 1 2 (block return ; return ã‚’è­˜åˆ¥å­ã«è¨­å®š
               (print 'one)
               (print 'two)
-              (return 3) ; ¤³¤³¤ÇÃ¦½Ğ
+              (return 3) ; ã“ã“ã§è„±å‡º
               (print 'four))
-   4) ; (+ 1 2 3 4) ¤¬É¾²Á
+   4) ; (+ 1 2 3 4) ãŒè©•ä¾¡
 
-;; break/nextÉÕ¤­for-each
+;; break/nextä»˜ãfor-each
 (define-syntax for-each-ext
   (syntax-rules ()
     [(_ break next lambda-expr arg-list ...)
@@ -637,7 +637,7 @@
                 (newline))
               '(#\x 1 2 3 x 4 5 6 y 7 8 9 10 z 100))
 
-;; ´Ê°×Îã³°µ¡¹½
+;; ç°¡æ˜“ä¾‹å¤–æ©Ÿæ§‹
 (define *signals* '())
 
 (define-syntax catch
@@ -710,14 +710,14 @@
 
 
 ;; module
-(add-load-path ".") ;; module¤¬¤¢¤ë¥Ñ¥¹¤ò*load-path*¤ËÄÉ²Ã
+(add-load-path ".") ;; moduleãŒã‚ã‚‹ãƒ‘ã‚¹ã‚’*load-path*ã«è¿½åŠ 
 (require "module-sample")
-;; (require "./module-sample") ; load-path¤ËÄÉ²Ã¤·¤Ê¤¤¾ì¹ç¤Ï¥Ñ¥¹»ØÄê¤¹¤ëÉ¬Í×¤¬¤¢¤ë
+;; (require "./module-sample") ; load-pathã«è¿½åŠ ã—ãªã„å ´åˆã¯ãƒ‘ã‚¹æŒ‡å®šã™ã‚‹å¿…è¦ãŒã‚ã‚‹
 (import module-sample)
 
-(use module-sample) ;; require,import¤ÎÂĞ¾İ¤¬Æ±Ì¾¤Ç¤¢¤ì¤Ğuse¤¬»È¤¨¤ë
+(use module-sample) ;; require,importã®å¯¾è±¡ãŒåŒåã§ã‚ã‚Œã°useãŒä½¿ãˆã‚‹
 
 (define x 1)
-(addx 10) ; x ¤¬´³¾Ä¤·¤Ê¤¤
+(addx 10) ; x ãŒå¹²æ¸‰ã—ãªã„
 
 
