@@ -1,4 +1,9 @@
+#!/usr/local/bin/gosh
+
+(use util.list)
+(use srfi-1)
 (use srfi-19)
+(use www.cgi)
 (use text.html-lite)
 (use gauche.collection)
 
@@ -48,6 +53,47 @@
                   (html:td (date-cell (date-year date) (date-month date) d)))
                 w)))
         (date-slices-of-month date))))
+
+
+(define (page . content)
+  `(,(cgi-header)
+    ,(html:html :lang "ja"
+                (html:head
+                       (html:meta :charset "utf-8")
+                       (html:title "簡易スケジュール表"))
+                      (apply html:body content))))
+
+(define (cmd-show-calendar y m)
+  (page
+   (if (and y m (<= 1 m 12) (<= 1753 y))
+       (calendar (make-month m y))
+       (calendar (current-date)))))
+
+(define (cmd-show-plan y m d)
+  (page
+   (calendar (make-month m y))
+   (html:form
+    (html:p #`",|y|年,|m|月,|d|日の予定")
+    (html:input :type "hidden" :name "c" :value "c")
+    (html:input :type "hidden" :name "y" :value (x->string y))
+    (html:input :type "hidden" :name "m" :value (x->string m))
+    (html:input :type "hidden" :name "d" :value (x->string d))
+    (html:p (html:textarea :rows 8 :cols 40 :name "p"
+                           (html-escape-string "予定を記入")))
+    (html:p (html:input :type "submit" :name "submit" :value "変更")))))
+
+
+(define (main args)
+  (cgi-main
+   (lambda (params)
+     (let ((y (cgi-get-parameter "y" params :convert x->integer))
+           (m (cgi-get-parameter "m" params :convert x->integer))
+           (d (cgi-get-parameter "d" params :convert x->integer)))
+       (if (and y m d)
+           (cmd-show-plan y m d)
+           (cmd-show-calendar y m))
+       ))))
+
 
 
 
