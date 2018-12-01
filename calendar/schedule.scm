@@ -60,14 +60,20 @@
                 w)))
         (date-slices-of-month date))))
 
+(define *style* "
+  span.planned {
+    background-color: #ffcccc;
+  }
+")
 
 (define (page . content)
   `(,(cgi-header)
     ,(html:html :lang "ja"
                 (html:head
                        (html:meta :charset "utf-8")
-                       (html:title "簡易スケジュール表"))
-                      (apply html:body content))))
+                       (html:title "簡易スケジュール表")
+                       (html:style :type "text/css" *style*))
+                (apply html:body content))))
 
 (define (cmd-show-calendar y m)
   (page
@@ -106,6 +112,14 @@
          (dbm-close (db))))))))
 
 (define (dbm-key y m d) #`",|y|-,|m|-,|d|")
+
+(define (date-cell year month date)
+  (if date
+      (html:a :href #`"?y=,|year|&m=,|month|&d=,|date|"
+              (if (dbm-exists? (db) (dbm-key year month date))
+                  (html:span :class "planned" date)
+                  date))
+      ""))
 
 (define (main args)
   (cgi-main
