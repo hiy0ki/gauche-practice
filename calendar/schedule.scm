@@ -1,11 +1,17 @@
 #!/usr/local/bin/gosh
 
 (use util.list)
+(use text.html-lite)
 (use srfi-1)
 (use srfi-19)
 (use www.cgi)
-(use text.html-lite)
-(use gauche.collection)
+(use gauche.sequence)
+(use dbm.fsdbm)
+(use gauche.charconv)
+(use gauche.parameter)
+
+(define db (make-parameter #f))
+(define *db-name* "/tmp/schedule.data") ; テスト用なので適当なところに
 
 (define (make-month m y)
   (make-date 0 0 0 0 1 m y (date-zone-offset (current-date))))
@@ -70,30 +76,56 @@
        (calendar (current-date)))))
 
 (define (cmd-show-plan y m d)
-  (page
-   (calendar (make-month m y))
-   (html:form
-    (html:p #`",|y|年,|m|月,|d|日の予定")
-    (html:input :type "hidden" :name "c" :value "c")
-    (html:input :type "hidden" :name "y" :value (x->string y))
-    (html:input :type "hidden" :name "m" :value (x->string m))
-    (html:input :type "hidden" :name "d" :value (x->string d))
-    (html:p (html:textarea :rows 8 :cols 40 :name "p"
-                           (html-escape-string "予定を記入")))
-    (html:p (html:input :type "submit" :name "submit" :value "変更")))))
+  (let ((plan (dbm-get (db) (dbm-key y m d) "")))
+    (page
+     (calendar (make-month m y))
+     (html:form
+      (html:p #`",|y|年,|m|月,|d|日の予定")
+      (html:input :type "hidden" :name "c" :value "e")
+      (html:input :type "hidden" :name "y" :value (x->string y))
+      (html:input :type "hidden" :name "m" :value (x->string m))
+      (html:input :type "hidden" :name "d" :value (x->string d))
+      (html:p (html:textarea :rows 8 :cols 40 :name "p"
+                             (html-escape-string plan)))
+      (html:p (html:input :type "submit" :name "submit" :value "変更"))))))
 
+(define (cmd-change-plan y m d plan)
+  (dbm-put! (db) (dbm-key y m d) plan)
+  (cgi-header :status "302 Moved"
+              :location #`"?y=,|y|&m=,|m|&d=,|d|"))
+
+(define-syntax with-db
+  (syntax-rules ()
+    ((with-db (db path) . body)
+     (parameterize
+         ((db (dbm-open <fsdbm> :path path :rw-mode :write)))
+       (guard
+        (e (else (dbm-close (db)) (raise e)))
+        (begin0
+         (begin . body)
+         (dbm-close (db))))))))
+
+(define (dbm-key y m d) #`",|y|-,|m|-,|d|")
 
 (define (main args)
   (cgi-main
    (lambda (params)
      (let ((y (cgi-get-parameter "y" params :convert x->integer))
            (m (cgi-get-parameter "m" params :convert x->integer))
-           (d (cgi-get-parameter "d" params :convert x->integer)))
-       (if (and y m d)
-           (cmd-show-plan y m d)
-           (cmd-show-calendar y m))
-       ))))
+           (d (cgi-get-parameter "d" params :convert x->integer))
+           (cmd (cgi-get-parameter "c" params))
+           (plan (cgi-get-parameter "p" params
+                                    :convert (cut ces-convert <> "*JP"))))
+       (cgi-output-character-encoding 'utf-8)
+       (with-db (db *db-name*)
+                (if (and y m d)
+                    (if (equal?  cmd "e")
+                        (cmd-change-plan y m d plan)
+                        (cmd-show-plan y m d))
+                    (cmd-show-calendar y m))
+       )))))
 
 
+;; TODO DB保存ができていない?
 
 
