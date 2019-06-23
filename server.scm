@@ -20,9 +20,9 @@
   (rxmatch-case (read-line iport)
                 [test eof-object? 'bad-request]
                 [#/^(GET|HEAD)\s+(\S+)\s+HTTP\/\d+\.\d+$/ (_ meth abs-path)
-(list* meth abs-path (rfc822-header->list iport))]
-[#/^[A-Z]+/ () 'not-implmented]
-[else 'bad-request]))
+                    (list* meth abs-path (rfc822-header->list iport))]
+                [#/^[A-Z]+/ () 'not-implmented]
+                [else 'bad-request]))
 
 ;; | syntaxサポート効かせるためのdummy
 
